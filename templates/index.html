@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Calculadora Cuadro de Cargas </title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-dark text-light">
+<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+    <img src="{{ url_for ('static', filename='logo.png') }}" width="90">
+    <h2 style="margin: 0;">Calculadora de cargas </h2>
+</div>
+
+<div class="container mt-5">
+
+<h2 class="text-center">Cuadro de Cargas ⚡</h2>
+
+<form method="post">
+
+<div class="row">
+
+<div class="col-md-3">
+<label>Sistema</label>
+<select name="sistema" class="form-control">
+
+<option value="monofasico">Monofásico</option>
+<option value="bifasico">Bifásico</option>
+<option value="trifasico">Trifásico</option>
+
+</select>
+</div>
+
+<div class="col-md-3">
+<label>Voltaje</label>
+<input name="voltaje" class="form-control" required>
+</div>
+
+<div class="col-md-3">
+<label>Carga</label>
+<input name="carga" class="form-control" required>
+</div>
+
+<div class="col-md-3">
+<label>Unidad</label>
+
+<select name="unidad" class="form-control">
+
+<option value="kVA">kVA</option>
+<option value="W">W</option>
+<option value="VA">VA</option>
+<option value="HP">hp</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3 mt-3">
+<label>Distancia (m)</label>
+<input name="distancia" class="form-control" required>
+</div>
+
+</div>
+
+<button class="btn btn-primary mt-4 w-100">CALCULAR</button>
+
+</form>
+
+{% if resultado %}
+
+<div class="card mt-4 bg-secondary">
+
+<div class="card-body">
+
+<h4>Resultados</h4>
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>Voltaje</th>
+<th>Corriente</th>
+<th>PTM</th>
+<th>Polos</th>
+<th>Fase</th>
+<th>Neutro</th>
+<th>Tierra</th>
+<th>Caída %</th>
+<th>RETIE</th>
+<th>Distancia</th>
+<th>diametro de canalizacion en PVC</th>
+</tr>
+
+<tr>
+
+<td>{{resultado.voltaje}} V</td>
+<td>{{resultado.corriente}} A</td>
+<td>{{resultado.ptm}} A</td>
+<td>{{resultado.polos}}</td>
+<td>{{resultado.fase}} AWG</td>
+<td>{{resultado.neutro}} AWG</td>
+<td>{{resultado.tierra}}</td>
+<td>{{resultado.caida}}</td>
+<td>{{resultado.retie}}</td>
+<td>{{resultado.distancia}} m</td>
+<td>{{resultado.pvc}}</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- CALIBRES PROBADOS -->
+
+<div class="card mt-4 bg-secondary">
+
+<div class="card-body">
+
+<h5>Calibres evaluados</h5>
+
+<ul>
+
+{% for intento in resultado.intentos %}
+
+<li>{{intento}}</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+
+</html>
