@@ -2,10 +2,7 @@ from flask import Flask, render_template, request
 import math
 
 app = Flask(__name__)
-
 contador_circuitos=[]
-
-# tabla 310.15(B)(16) Ampacidad cobre 60°C
 ampacidad = {
 "14":15,
 "12":20,
@@ -22,7 +19,6 @@ ampacidad = {
 "4/0":195
 }
 
-# tabla 8 cobre Resistencia ohm/km
 resistencia = {
 "14":10.7,
 "12":6.73,
@@ -39,7 +35,6 @@ resistencia = {
 "4/0":0.2050
 }
 
-# tabla 5 (THHN, THWN, THWN-2)
 area_awg={
 "14":6.258,
 "12":8.581,
@@ -66,7 +61,6 @@ pvc_tabla = {
 "2":940
 }
 
-# EMT
 emt_tabla = {
 "1/2":78,
 "3/4":138,
@@ -76,7 +70,6 @@ emt_tabla = {
 "2":860
 }
 
-# tabla 240.6(A)
 calibres = list(ampacidad.keys())
 
 ptm_tabla=[
@@ -90,7 +83,6 @@ ptm_tabla=[
 5000,6000
 ]
 
-# tierra
 tierra_tabla={
 15:"14 AWG",
 20:"12 AWG",
