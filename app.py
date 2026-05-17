@@ -3,6 +3,8 @@ import math
 
 app = Flask(__name__)
 
+contador_circuitos=[]
+
 # tabla 310.15(B)(16) Ampacidad cobre 60°C
 ampacidad = {
 "14":15,
@@ -36,7 +38,8 @@ resistencia = {
 "3/0":0.2610,
 "4/0":0.2050
 }
-#tabla 5 (THHN, THWN, THWN-2) seccion aprox mm2
+
+# tabla 5 (THHN, THWN, THWN-2)
 area_awg={
 "14":6.258,
 "12":8.581,
@@ -52,28 +55,42 @@ area_awg={
 "3/0":172.8,
 "4/0":208.8
 }
-#tabla 4, art 352- tubo (conduit) de pvc rigido tipo A (pvc)
+
+# PVC
 pvc_tabla = {
 "1/2":100,
-"1/4":168,
+"3/4":168,
 "1":279,
 "1 1/4":456,
 "1 1/2":600,
 "2":940
 }
 
-#tabla 240.6(A) valores nominales estandar en A
-calibres = list(ampacidad.keys())
-ptm_tabla=[15,20,25,30,35,
-           40,45,50,60,70,
-           80,90,100,110,125,
-           150, 175,200,225,250,
-           300,350,400,450,500,
-           600,700,800,1000,1200,
-           1600,2000,2500,3000,4000,
-           5000,6000]
+# EMT
+emt_tabla = {
+"1/2":78,
+"3/4":138,
+"1":222,
+"1 1/4":383,
+"1 1/2":527,
+"2":860
+}
 
-#tabla 250.122 cobre
+# tabla 240.6(A)
+calibres = list(ampacidad.keys())
+
+ptm_tabla=[
+15,20,25,30,35,
+40,45,50,60,70,
+80,90,100,110,125,
+150,175,200,225,250,
+300,350,400,450,500,
+600,700,800,1000,1200,
+1600,2000,2500,3000,4000,
+5000,6000
+]
+
+# tierra
 tierra_tabla={
 15:"14 AWG",
 20:"12 AWG",
@@ -94,7 +111,7 @@ tierra_tabla={
 def index():
 
     resultado=None
-    
+
     if request.method=="POST":
 
         sistema=request.form["sistema"]
@@ -102,99 +119,172 @@ def index():
         carga=float(request.form["carga"])
         unidad=request.form["unidad"]
         DT=float(request.form["distancia"])
+        FP=float(request.form["fp"])
 
-        # convertir kVA a VA
+        # VALIDAR FP
+        if FP<0.65 or FP>1:
+            resultado={
+            "error":"⚠️ Factor de potencia inválido. Debe estar entre 0.65 y 1.00"
+            }
+            return render_template("index.html", resultado=resultado)
+
+        # VALIDAR DISTANCIA
+        if DT>110:
+            resultado={
+            "error":"⚠️ Distancia mayor a 110 m. Recomendaciones: dividir carga, instalar subtablero o aumentar tensión."
+            }
+            return render_template("index.html", resultado=resultado)
+
+        # CONVERSION DE VOLTAJE:
+        # El usuario siempre ingresa voltaje línea a línea (208/214/220 V).
+        # Para monofásico y bifásico, la carga opera con voltaje de fase (L-N),
+        # que equivale a V_linea / sqrt(3).
+        # Para trifásico se mantiene el voltaje línea a línea en la fórmula.
+        if sistema=="trifasico":
+            V_calculo=V
+        else:
+            V_calculo=V/math.sqrt(3)
+
+        # convertir carga
         if unidad=="kVA":
             S=carga*1000
+
+        elif unidad=="kW":
+            S=(carga*1000)/FP
+
         elif unidad=="W":
-            S=carga
+            S=carga/FP
+
         elif unidad=="VA":
             S=carga
+
         elif unidad=="HP":
-            S=(carga*(745.7/1))/0.85
+            S=(carga*745.7)/(FP*0.85)
 
         # calcular corriente
         if sistema=="trifasico":
-            I=S/(math.sqrt(3)*V)
+            I=S/(math.sqrt(3)*V_calculo)
             polos=3
+
         elif sistema=="bifasico":
-            I=S/V
+            I=S/V_calculo
             polos=2
+
         else:
-            I=S/V
+            I=S/V_calculo
             polos=1
 
-        indice=None
-        for i,awg in enumerate(calibres):
-            if I<ampacidad[awg]:
-                indice=i
-                break
-        if indice is None:
+        # VALIDAR CORRIENTE
+        if I>195:
             resultado={
-            "voltaje":V,
-            "corriente":round(I,2),
-            "ptm":"No calculada",
-            "polos":polos,
-            "fase":"Mayor a 4/0 AWG",
-            "neutro":"Mayor a 4/0 AWG",
-            "tierra":"No calculada",
-            "caida":"No calculada",
-            "distancia":DT,
-            "intentos":[]
+            "error":"⚠️ Corriente superior a 195 A. Recomendaciones: dividir carga, usar mayor tensión o sistema trifásico."
             }
             return render_template("index.html", resultado=resultado)
-        NC=1
+
+        indice=None
+
+        for i,awg in enumerate(calibres):
+
+            if I<=ampacidad[awg]:
+                indice=i
+                break
+
+        if indice is None:
+
+            resultado={
+            "error":"⚠️ La carga supera el conductor 4/0 AWG."
+            }
+
+            return render_template("index.html", resultado=resultado)
 
         calibres_probados=[]
-        
+
         while True:
+
             calibre=calibres[indice]
+
             RC=resistencia[calibre]
 
             if sistema=="trifasico":
-                CT=((math.sqrt(3)*DT*RC*I)/(1000*V*NC))*100
+
+                CT=((math.sqrt(3)*DT*RC*I)/(1000*V_calculo))*100
+
             else:
-                CT=((2*DT*RC*I)/(1000*V*NC))*100
+
+                CT=((2*DT*RC*I)/(1000*V_calculo))*100
+
             calibres_probados.append(
-            f"{calibre} AWG → CT ={round(CT,2)} % ")
+            f"{calibre} AWG → CT = {round(CT,2)} %"
+            )
 
-            if CT <=3:
+            if CT<=3:
                 break
+
             indice+=1
-            if indice >=len(calibres):
+
+            if indice>=len(calibres):
                 break
 
+        # VALIDAR RETIE
+        if CT>3:
 
-        PTM=ptm_tabla[0]
-        diferencia_min = abs(I - PTM)
+            resultado={
+            "error":"🔴 RETIE NO CUMPLE. Ni usando 4/0 AWG se logra caída menor al 3 %. Recomendaciones: aumentar tensión, reducir distancia o dividir carga."
+            }
+
+            return render_template("index.html", resultado=resultado)
+
+        # PTM superior o igual
+        PTM=ptm_tabla[-1]
+
         for valor in ptm_tabla:
-            diferencia = abs(I - valor)
-            if diferencia < diferencia_min:
-                diferencia_min = diferencia
+
+            if valor>=I:
                 PTM=valor
+                break
 
         neutro=calibre
 
         tierra=""
+
         for proteccion in tierra_tabla:
-            if PTM <=proteccion:
+
+            if PTM<=proteccion:
                 tierra=tierra_tabla[proteccion]
                 break
-        conductores=3
-        area_total = conductores* area_awg[calibre]
-        diametro_pvc=""
-        for tubo,area in  pvc_tabla.items():
-            if area_total <= area:
-                diametro_pvc = tubo
-                break
-        if CT<= 3:
-            retie = "🟢Cumple RETIE"
-        else:
-            retie = "🔴No cumple RETIE"
 
+        conductores=3
+
+        area_total=conductores*area_awg[calibre]
+
+        diametro_pvc=""
+
+        for tubo,area in pvc_tabla.items():
+
+            if area_total<=area:
+                diametro_pvc=tubo
+                break
+
+        diametro_emt=""
+
+        for tubo,area in emt_tabla.items():
+
+            if area_total<=area:
+                diametro_emt=tubo
+                break
+
+        retie="🟢 Cumple RETIE"
+
+        contador_circuitos.append(
+        str(len(contador_circuitos)+1)
+        )
+
+        circuito_str="-".join(contador_circuitos)
 
         resultado={
+
             "voltaje":V,
+            "voltaje_fase":round(V_calculo,2),
             "corriente":round(I,2),
             "ptm":PTM,
             "polos":polos,
@@ -204,10 +294,14 @@ def index():
             "caida":round(CT,3),
             "distancia":DT,
             "retie":retie,
-            "pvc": diametro_pvc,
+            "pvc":diametro_pvc,
+            "emt":diametro_emt,
+            "circuito":circuito_str,
             "intentos":calibres_probados
-              }
 
-    return render_template("index.html",resultado=resultado)
+        }
+
+    return render_template("index.html", resultado=resultado)
+
 if __name__=="__main__":
     app.run(debug=True)
