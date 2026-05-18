@@ -271,7 +271,7 @@ def index():
         str(len(contador_circuitos)+1)
         )
 
-        circuito_str="-".join(contador_circuitos)
+circuito_str="-".join(contador_circuitos)
 
 resultado={
 
