@@ -271,30 +271,30 @@ def index():
         str(len(contador_circuitos)+1)
         )
 
-circuito_str="-".join(contador_circuitos)
+        circuito_str="-".join(contador_circuitos)
 
-resultado={
+        resultado={
 
-    "voltaje":V,
-    "voltaje_fase":round(V_calculo,2),
-    "corriente":round(I,2),
-    "ptm":PTM,
-    "polos":polos,
-    "fase":calibre,
-    "neutro":neutro,
-    "tierra":tierra,
-    "caida":round(CT,3),
-    "distancia":DT,
-    "fp":FP,
-    "retie":retie,
-    "pvc":diametro_pvc,
-    "emt":diametro_emt,
-    "circuito":circuito_str,
-    "intentos":calibres_probados
+            "voltaje":V,
+            "voltaje_fase":round(V_calculo,2),
+            "corriente":round(I,2),
+            "ptm":PTM,
+            "polos":polos,
+            "fase":calibre,
+            "neutro":neutro,
+            "tierra":tierra,
+            "caida":round(CT,3),
+            "distancia":DT,
+            "fp":FP,
+            "retie":retie,
+            "pvc":diametro_pvc,
+            "emt":diametro_emt,
+            "circuito":circuito_str,
+            "intentos":calibres_probados
 
-}
+        }
 
-return render_template("index.html", resultado=resultado)
+    return render_template("index.html", resultado=resultado)
 
 if __name__=="__main__":
     app.run(debug=True)
