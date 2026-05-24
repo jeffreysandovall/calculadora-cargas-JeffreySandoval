@@ -292,6 +292,7 @@ cursor:pointer;
 <option value="W">W</option>
 <option value="VA">VA</option>
 <option value="HP">HP</option>
+<option value="CV">CV</option>
 
 </select>
 
@@ -375,7 +376,7 @@ cursor:pointer;
 <tr>
 
 <td>{{resultado.circuito}}</td>
-<td>{{resultado.voltaje}} V</td>
+<td>{{resultado.voltaje_fase}} V</td>
 <td>{{resultado.corriente}} A</td>
 <td>{{resultado.ptm}} A</td>
 <td>{{resultado.polos}}</td>
@@ -477,17 +478,27 @@ cursor:pointer;
 
 <ul>
 
-<li>Seleccione el sistema eléctrico.</li>
+<li>Seleccione el sistema eléctrico, las opciones son:
+    monofasico, bifasico, trifasico
+</li>
 
-<li>Seleccione el voltaje.</li>
+<li>Seleccione el voltaje.
+    La tensión línea a línea son los siguientes : 
+    208 V, 214 V o 220 V. 
+</li>
 
 <li>Ingrese la carga.</li>
 
 <li>Seleccione la unidad.</li>
 
-<li>Ingrese la distancia.</li>
+<li>Ingrese la distancia.
+    el rando es entre 1 hasta 110 metros, "⚠️ la distancia no puede ser menor 
+    o igual a cero (<=0)⚠️ "
+</li>
 
-<li>Ingrese el factor de potencia.</li>
+<li>Ingrese el factor de potencia. 
+    tenga en cuenta que debe de estar en el rango de 0.65 y 1
+</li>
 
 <li>El software calcula automáticamente:
 corriente,
