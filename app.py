@@ -121,7 +121,12 @@ def index():
             return render_template("index.html", resultado=resultado)
 
         # VALIDAR DISTANCIA
-        if DT>110:
+        if DT <= 0:
+            resultado={
+                "error":" ⚠️ la distancia no puede ser menor o igual a 0 "
+            }
+            return render_template ("index.html", resultado=resultado)
+        elif DT>110:
             resultado={
             "error":"⚠️ Distancia mayor a 110 m. Recomendaciones: dividir carga, instalar subtablero o aumentar tensión."
             }
@@ -152,6 +157,9 @@ def index():
 
         elif unidad=="HP":
             S=(carga*745.7)/(FP*0.85)
+        
+        elif unidad=="CV":
+            S=(carga*735.5)/(FP*0.85)
 
         # calcular corriente
         if sistema=="trifasico":
