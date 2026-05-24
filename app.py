@@ -128,15 +128,11 @@ def index():
             return render_template ("index.html", resultado=resultado)
         elif DT>110:
             resultado={
-            "error":"⚠️ Distancia mayor a 110 m. Recomendaciones: dividir carga, instalar subtablero o aumentar tensión."
+            "error":"⚠️ la distancia no puede ser mayor a 110 m."
             }
             return render_template("index.html", resultado=resultado)
 
-        # CONVERSION DE VOLTAJE:
-        # El usuario siempre ingresa voltaje línea a línea (208/214/220 V).
-        # Para monofásico y bifásico, la carga opera con voltaje de fase (L-N),
-        # que equivale a V_linea / sqrt(3).
-        # Para trifásico se mantiene el voltaje línea a línea en la fórmula.
+
         if sistema=="trifasico":
             V_calculo=V
         else:
