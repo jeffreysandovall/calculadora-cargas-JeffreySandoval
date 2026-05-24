@@ -123,12 +123,12 @@ def index():
         # VALIDAR DISTANCIA
         if DT <= 0:
             resultado={
-                "error":" ⚠️ la distancia no puede ser menor o igual a 0 "
+                "error":" ⚠️ la distancia no puede ser menor o igual a 0 metros "
             }
             return render_template ("index.html", resultado=resultado)
         elif DT>110:
             resultado={
-            "error":"⚠️ la distancia no puede ser mayor a 110 m."
+            "error":"⚠️ la distancia no puede ser mayor a 110 metros."
             }
             return render_template("index.html", resultado=resultado)
 
