@@ -152,10 +152,10 @@ def index():
             S=carga
 
         elif unidad=="HP":
-            S=(carga*745.7)/(FP*0.85)
+            S=(carga*745.7)/(FP)
         
         elif unidad=="CV":
-            S=(carga*735.5)/(FP*0.85)
+            S=(carga*735.5)/(FP)
 
         # calcular corriente
         if sistema=="trifasico":
